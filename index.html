@@ -11,7 +11,38 @@
       direction: rtl; 
       margin: 0;
       overflow-x: hidden;
+      display: flex;
     }
+    
+    .page-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .products-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 180px;
+      height: 100vh;
+      background: #f8f9fa;
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 1px solid #dee2e6;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .main-content {
+      flex: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 120px 20px 20px;
+    }
+    
     .top-bar {
       position: fixed;
       top: 0;
@@ -88,20 +119,6 @@
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-    .products-sidebar {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 180px;
-      height: 100vh;
-      background: #f8f9fa;
-      padding: 20px;
-      overflow-y: auto;
-      border-left: 1px solid #dee2e6;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-    }
     .sidebar-section {
       margin-bottom: 30px;
     }
@@ -148,12 +165,6 @@
       background: #007bff;
       color: white;
       border-color: #007bff;
-    }
-    .main-content {
-      max-width: 1000px;
-      margin: 0 auto;
-      text-align: center;
-      padding: 120px 20px 20px; /* Increased top padding for top bar */
     }
     .container {
       display: flex;
@@ -542,6 +553,10 @@
     }
     
     @media screen and (max-width: 768px) {
+      body {
+        display: block;
+      }
+      
       .products-sidebar {
         position: fixed;
         width: 100%;
@@ -640,65 +655,66 @@
   </style>
 </head>
 <body>
-  <!-- شريط المار -->
-  <div class="marquee-container">
-    <marquee behavior="scroll" direction="left" scrollamount="3">
-      <div class="marquee-text">
-        عروض خاصة على جميع المنتجات! تصفح الآن واحصل على خصومات تصل إلى 50%
-      </div>
-    </marquee>
-  </div>
-
-  <button class="cart-btn" id="cart-btn">
-    <i>🛒</i>
-    <span class="cart-badge" id="cart-badge">0</span>
-  </button>
-  
-  <div class="cart-modal" id="cart-modal">
-    <div class="cart-content" id="cart-content">
-      <div class="cart-header">
-        <h3>سلة التسوق</h3>
-        <button id="close-cart">×</button>
-      </div>
-      <div id="cart-items" class="cart-items"></div>
-      <div class="cart-total">
-        <div class="cart-total-label">المجموع الكلي:</div>
-        <span class="cart-total-amount" id="cart-total">0.00 درهم</span>
-      </div>
-      
-      <div class="cart-actions">
-        <button class="clear-cart-btn" onclick="clearCart()">تفريغ السلة</button>
-        <button class="share-cart-btn" onclick="shareOnWhatsApp()">مشاركة على WhatsApp</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="top-bar">
-    <div class="top-bar-content">
-      <h2 class="page-title">قائمة المنتجات</h2>
-      <input type="text" id="search" placeholder="ابحث بالوصف أو الباركود">
+  <div class="page-container">
+    <div class="main-content">
+      <!-- شريط المار -->
       <div class="marquee-container">
-        <div class="marquee-content">
-          <!-- سيتم ملء هذا المحتوى ديناميكياً -->
+        <marquee behavior="scroll" direction="left" scrollamount="3">
+          <div class="marquee-text">
+            عروض خاصة على جميع المنتجات! تصفح الآن واحصل على خصومات تصل إلى 50%
+          </div>
+        </marquee>
+      </div>
+
+      <button class="cart-btn" id="cart-btn">
+        <i>🛒</i>
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+      
+      <div class="cart-modal" id="cart-modal">
+        <div class="cart-content" id="cart-content">
+          <div class="cart-header">
+            <h3>سلة التسوق</h3>
+            <button id="close-cart">×</button>
+          </div>
+          <div id="cart-items" class="cart-items"></div>
+          <div class="cart-total">
+            <div class="cart-total-label">المجموع الكلي:</div>
+            <span class="cart-total-amount" id="cart-total">0.00 درهم</span>
+          </div>
+          
+          <div class="cart-actions">
+            <button class="clear-cart-btn" onclick="clearCart()">تفريغ السلة</button>
+            <button class="share-cart-btn" onclick="shareOnWhatsApp()">مشاركة على WhatsApp</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="products-sidebar" id="products-sidebar">
-    <div class="sidebar-section">
-      <button class="show-all-btn" id="show-all-btn">عرض الكل</button>
-      <h3>العلامات التجارية</h3>
-      <div id="brands-list"></div>
-    </div>
-    <div class="sidebar-section">
-      <h3>المنتجات</h3>
-      <div id="products-list"></div>
-    </div>
-  </div>
+      <div class="top-bar">
+        <div class="top-bar-content">
+          <h2 class="page-title">قائمة المنتجات</h2>
+          <input type="text" id="search" placeholder="ابحث بالوصف أو الباركود">
+          <div class="marquee-container">
+            <div class="marquee-content">
+              <!-- سيتم ملء هذا المحتوى ديناميكياً -->
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <div class="main-content">
-    <div id="product-list" class="container"></div>
+      <div id="product-list" class="container"></div>
+    </div>
+    <div class="products-sidebar" id="products-sidebar">
+      <div class="sidebar-section">
+        <button class="show-all-btn" id="show-all-btn">عرض الكل</button>
+        <h3>العلامات التجارية</h3>
+        <div id="brands-list"></div>
+      </div>
+      <div class="sidebar-section">
+        <h3>المنتجات</h3>
+        <div id="products-list"></div>
+      </div>
+    </div>
   </div>
 
   <div class="counter-container">
