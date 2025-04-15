@@ -11,13 +11,13 @@
       direction: rtl; 
       margin: 0;
       overflow-x: hidden;
+      display: flex;
     }
     
     .page-container {
-      position: relative;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding-right: 180px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
     
     .products-sidebar {
@@ -36,12 +36,13 @@
     }
     
     .main-content {
-      position: relative;
-      width: 100%;
+      flex: 1;
       max-width: 1000px;
       margin: 0 auto;
       text-align: center;
       padding: 120px 20px 20px;
+      overflow-y: auto;
+      height: calc(100vh - 120px);
     }
     
     .top-bar {
@@ -58,7 +59,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       z-index: 1000;
     }
-    
+
     .top-bar-content {
       width: 100%;
       max-width: 1000px;
@@ -81,26 +82,31 @@
       width: 100%;
       overflow: hidden;
       background: #f8f9fa;
-      padding: 10px;
-      margin-top: 10px;
+      padding: 5px;
+      margin-top: 5px;
+    }
+    .marquee-text {
+      font-size: 24px;
+      color: blue;
+      font-weight: bold;
     }
     .marquee-content {
       display: flex;
-      animation: marquee 30s linear infinite;
-      gap: 20px;
+      animation: marquee 10s linear infinite;
+      gap: 15px;
       direction: ltr;
     }
     .marquee-product {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 20px;
+      padding: 5px 15px;
       background: white;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       direction: rtl;
-      min-width: 500px;  
-      width: 500px;      
+      min-width: 300px;
+      width: 300px;      
       flex-shrink: 0;    
     }
     .marquee-product img {
@@ -117,10 +123,10 @@
       color: #2196F3;
       font-weight: bold;
     }
-    @keyframes marquee {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
+   @keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
     .sidebar-section {
       margin-bottom: 30px;
     }
@@ -554,6 +560,13 @@
         max-width: 300px;
     }
     
+    #product-list {
+      margin-top: 20px;
+      padding: 10px;
+      overflow-y: auto;
+      height: calc(100vh - 220px);
+    }
+    
     @media screen and (max-width: 768px) {
       body {
         display: block;
@@ -584,7 +597,7 @@
       }
       
       .main-content {
-        padding: 120px 10px 20px;
+        padding: 150px 10px 20px;
         margin-top: 50vh; /* إضافة هوامش أعلى لتجنب التداخل مع الشريط الجانبي */
       }
       
@@ -660,13 +673,7 @@
   <div class="page-container">
     <div class="main-content">
       <!-- شريط المار -->
-      <div class="marquee-container">
-        <marquee behavior="scroll" direction="left" scrollamount="3">
-          <div class="marquee-text">
-            عروض خاصة على جميع المنتجات! تصفح الآن واحصل على خصومات تصل إلى 50%
-          </div>
-        </marquee>
-      </div>
+      
 
       <button class="cart-btn" id="cart-btn">
         <i>🛒</i>
@@ -694,17 +701,29 @@
 
       <div class="top-bar">
         <div class="top-bar-content">
-          <h2 class="page-title">قائمة المنتجات</h2>
-          <input type="text" id="search" placeholder="ابحث بالوصف أو الباركود">
           <div class="marquee-container">
-            <div class="marquee-content">
-              <!-- سيتم ملء هذا المحتوى ديناميكياً -->
+            <marquee behavior="scroll" direction="right" scrollamount="3">
+              <div class="marquee-text">
+             عروض خاصة على جميع المنتجات! تصفح الآن واحصل على خصومات مهمة 
+              </div>
+            </marquee>
+            <div class="marquee-container">
+              <div class="marquee-content">
+                <!-- Your product marquee items here -->
+              </div>
+            </div>
+
+            <h2 class="page-title">قائمة المنتجات</h2>
+            <input type="text" id="search" placeholder="ابحث بالوصف أو الباركود">
+
+            <!-- Product list below the search box -->
+            <div id="product-list" class="container" style="margin-top: 20px;">
+              <!-- Product list will be populated here -->
             </div>
           </div>
         </div>
       </div>
 
-      <div id="product-list" class="container"></div>
     </div>
     <div class="products-sidebar" id="products-sidebar">
       <div class="sidebar-section">
