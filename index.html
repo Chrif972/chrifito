@@ -40,9 +40,10 @@
       max-width: 1000px;
       margin: 0 auto;
       text-align: center;
-      padding: 120px 20px 20px;
+      padding: 150px 20px 100px;
       overflow-y: auto;
-      height: calc(100vh - 120px);
+      height: calc(100vh - 150px);
+      position: relative;
     }
     
     .top-bar {
@@ -196,6 +197,8 @@
       align-items: center;
       position: relative;
       transition: all 0.3s ease;
+      margin-bottom: 20px;
+      min-height: 200px;
     }
     
     .product-content {
@@ -562,9 +565,10 @@
     
     #product-list {
       margin-top: 20px;
-      padding: 10px;
+      padding: 10px 10px 100px;
+      height: calc(100vh - 270px);
       overflow-y: auto;
-      height: calc(100vh - 220px);
+      position: relative;
     }
     
     @media screen and (max-width: 768px) {
@@ -667,6 +671,104 @@
         margin-top: 50vh; /* إضافة هوامش أعلى لتجنب التداخل مع الشريط الجانبي */
       }
     }
+    /* Lightbox styles */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .lightbox-content {
+      max-width: 95%;
+      max-height: 95%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.3s ease;
+      transform-origin: center;
+      cursor: grab;
+    }
+
+    .lightbox img:active {
+      cursor: grabbing;
+    }
+
+    .lightbox img.grabbing {
+      cursor: grabbing;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .zoom-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .zoom-button:hover {
+      background: white;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 36px;
+      cursor: pointer;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 50%;
+    }
+    /* Add spacing to the last row of products */
+    @media screen and (min-width: 768px) {
+      .producto:nth-child(3n) {
+        margin-bottom: 40px;
+      }
+    }
+
+    /* Add spacing to the last product in the list */
+    #product-list .producto:last-child {
+      margin-bottom: 100px;
+    }
   </style>
 </head>
 <body>
@@ -696,6 +798,17 @@
             <button class="clear-cart-btn" onclick="clearCart()">تفريغ السلة</button>
             <button class="share-cart-btn" onclick="shareOnWhatsApp()">مشاركة على WhatsApp</button>
           </div>
+        </div>
+      </div>
+
+      <div class="lightbox" id="productLightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="zoom-controls">
+          <button class="zoom-button" onclick="zoomImage(-0.1)">-</button>
+          <button class="zoom-button" onclick="zoomImage(0.1)">+</button>
+        </div>
+        <div class="lightbox-content">
+          <img src="" alt="" id="lightboxImage">
         </div>
       </div>
 
@@ -1106,7 +1219,7 @@ function decreaseQuantity(productId) {
         div.dataset.productId = producto.id;
         div.innerHTML = `
           <div class="product-content">
-            <img src="${producto.url || ''}" alt="${producto.descrepcion}">
+            <img src="${producto.url || ''}" alt="${producto.descrepcion}" onclick="openLightbox('${producto.url || ''}')">
             <h3>${producto.descrepcion}</h3>
             <p>${producto.pventa} درهم</p>
         ${producto.cantidad <= 5 ? `<span class="stock-alert">  بقي ${producto.cantidad}</span>` : ''}
@@ -1285,6 +1398,108 @@ function decreaseQuantity(productId) {
       counter++;
       document.getElementById('counterDisplay').textContent = counter;
     }
+
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX, startY;
+    let currentX = 0, currentY = 0;
+
+    function zoomImage(amount) {
+      const lightboxImage = document.getElementById('lightboxImage');
+      currentZoom += amount;
+      
+      if (currentZoom < 1) {
+        currentZoom = 1;
+        currentX = 0;
+        currentY = 0;
+      } else if (currentZoom > 3) {
+        currentZoom = 3;
+      }
+      
+      updateTransform(lightboxImage);
+    }
+
+    function updateTransform(image) {
+      image.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentZoom})`;
+    }
+
+    function startDrag(e) {
+      if (currentZoom > 1) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        document.getElementById('lightboxImage').classList.add('grabbing');
+      }
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      
+      currentX += deltaX;
+      currentY += deltaY;
+      
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      const lightboxImage = document.getElementById('lightboxImage');
+      updateTransform(lightboxImage);
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      document.getElementById('lightboxImage').classList.remove('grabbing');
+    }
+
+    function openLightbox(imageSrc) {
+      const lightbox = document.getElementById('productLightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      
+      lightboxImage.src = imageSrc;
+      lightboxImage.style.transform = 'scale(1)';
+      currentZoom = 1;
+      currentX = 0;
+      currentY = 0;
+      
+      // Add event listeners for dragging
+      lightboxImage.addEventListener('mousedown', startDrag);
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', stopDrag);
+      
+      lightbox.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('productLightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      
+      // Remove event listeners
+      lightboxImage.removeEventListener('mousedown', startDrag);
+      document.removeEventListener('mousemove', drag);
+      document.removeEventListener('mouseup', stopDrag);
+      
+      lightbox.style.display = 'none';
+      currentZoom = 1;
+      currentX = 0;
+      currentY = 0;
+    }
+
+    // Add click event to close lightbox
+    document.getElementById('productLightbox').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget || e.target.classList.contains('lightbox-close')) {
+        closeLightbox();
+      }
+    });
+
+    // Update product image structure
+    const productImages = document.querySelectorAll('.product-content img');
+    productImages.forEach(img => {
+      img.addEventListener('click', () => {
+        openLightbox(img.src);
+      });
+    });
   </script>
 </body>
 </html>
