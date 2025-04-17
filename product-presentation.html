@@ -10,17 +10,18 @@
             padding: 0;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
         }
 
         .presentation-container {
-            position: relative;
             width: 100vw;
             height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #f5f5f5;
+            background-color: #ffffff;
+            position: relative;
         }
 
         .product-image {
@@ -28,6 +29,7 @@
             height: 80vh;
             object-fit: contain;
             margin-bottom: 20px;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .product-description {
@@ -36,141 +38,119 @@
             background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 90%;
             max-width: 800px;
-        }
-
-        .product-description h2 {
+            font-size: 18px;
             color: #333;
-            margin-bottom: 10px;
         }
 
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
-        }
-
-        .back-button:hover {
-            background: #0056b3;
-        }
-
-        .control-buttons {
+        .controls {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 10px;
+            z-index: 10;
         }
 
-        .control-button {
+        .control-btn {
+            padding: 10px 20px;
             background: #007bff;
             color: white;
             border: none;
-            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
             transition: background 0.2s;
         }
 
-        .control-button:hover {
+        .control-btn:hover {
             background: #0056b3;
+        }
+
+        .stop-btn {
+            background: #dc3545;
+        }
+
+        .stop-btn:hover {
+            background: #c82333;
         }
     </style>
 </head>
 <body>
     <div class="presentation-container">
-        <button class="back-button" onclick="window.history.back()">رجوع</button>
         <img id="productImage" class="product-image" src="" alt="">
-        <div class="product-description">
-            <h2 id="productName"></h2>
-            <p id="productPrice"></p>
-            <p id="productDescription"></p>
-        </div>
-        <div class="control-buttons">
-            <button class="control-button" onclick="prevProduct()">السابق</button>
-            <button class="control-button" onclick="nextProduct()">التالي</button>
+        <div class="product-description" id="productDescription"></div>
+        <div class="controls">
+            <button class="control-btn" onclick="startPresentation()">بدء العرض</button>
+            <button class="control-btn stop-btn" onclick="stopPresentation()">إيقاف العرض</button>
         </div>
     </div>
 
-    <script src="https://cdn.firebase.com/libs/firebase/9.6.1/firebase-app.js"></script>
-    <script src="https://cdn.firebase.com/libs/firebase/9.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD6qlt1NBcaqzCKVkhMBLz76NlpRC36UPs",
             authDomain: "yttutorialfb-bb7c9.firebaseapp.com",
             databaseURL: "https://yttutorialfb-bb7c9-default-rtdb.firebaseio.com",
             projectId: "yttutorialfb-bb7c9",
             storageBucket: "yttutorialfb-bb7c9.appspot.com",
-            messagingSenderId: "1012190612930",
-            appId: "1:1012190612930:web:5991393b3b17b080e51666"
+            messagingSenderId: "1062760617376",
+            appId: "1:1062760617376:web:79276b2c60292186e85851"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let products = [];
         let currentIndex = 0;
-        let slideshowInterval;
+        let intervalId = null;
 
         // Get products from Firebase
         db.ref("Producto").orderByChild("id").limitToLast(100).on("value", (snapshot) => {
             products = [];
             snapshot.forEach(child => {
                 const producto = child.val();
-                if (producto.cantidad > 0) {
-                    producto.id = child.key;
+                if (producto.cantidad > 0 && producto.url) {
                     products.push(producto);
                 }
             });
-
             if (products.length > 0) {
                 displayProduct(currentIndex);
-                startSlideshow();
             }
         });
 
         function displayProduct(index) {
+            if (products.length === 0) return;
+
             const product = products[index];
-            if (product) {
-                document.getElementById("productImage").src = product.url || "";
-                document.getElementById("productName").textContent = product.descrepcion || "";
-                document.getElementById("productPrice").textContent = `${product.pventa || 0} درهم`;
-                document.getElementById("productDescription").textContent = product.descripcion || "";
+            document.getElementById("productImage").src = product.url;
+            document.getElementById("productDescription").innerHTML = `
+                <h2>${product.descrepcion}</h2>
+                <p>السعر: ${product.pventa} درهم</p>
+                ${product.marca ? `<p>العلامة التجارية: ${product.marca}</p>` : ''}
+                ${product.cantidad <= 5 ? `<p class="alert">الكمية المتبقية: ${product.cantidad}</p>` : ''}
+            `;
+        }
+
+        function startPresentation() {
+            if (intervalId) return;
+            
+            intervalId = setInterval(() => {
+                currentIndex = (currentIndex + 1) % products.length;
+                displayProduct(currentIndex);
+            }, 5000);
+        }
+
+        function stopPresentation() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
             }
         }
 
-        function startSlideshow() {
-            clearInterval(slideshowInterval);
-            slideshowInterval = setInterval(() => {
-                nextProduct();
-            }, 5000); // 5 seconds
-        }
-
-        function nextProduct() {
-            currentIndex = (currentIndex + 1) % products.length;
-            displayProduct(currentIndex);
-        }
-
-        function prevProduct() {
-            currentIndex = (currentIndex - 1 + products.length) % products.length;
-            displayProduct(currentIndex);
-        }
-
-        // Clean up on page unload
-        window.addEventListener("unload", () => {
-            clearInterval(slideshowInterval);
-        });
+        // Start presentation automatically
+        startPresentation();
     </script>
 </body>
 </html>
