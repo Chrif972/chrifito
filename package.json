@@ -1,0 +1,57 @@
+{
+  "name": "api-settings",
+  "version": "1.0.0",
+  "description": "API Settings Website",
+  "main": "index.html",
+  "scripts": {
+    "build": "npm run copy",
+    "copy": "cp -r . ../dist"
+  }
+}
+Create a .github/workflows/deploy.yml file with these contents:
+yaml
+CopyInsert
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+Create a dist directory for the built files:
+bash
+CopyInsert in Terminal
+mkdir dist
+After making these changes:
+
+Commit your changes
+Push to your repository
+The deployment should work automatically
+Would you like me to help you implement these changes?
+
+Feedback submitted
+Generating...
