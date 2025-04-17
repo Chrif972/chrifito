@@ -87,35 +87,30 @@
       width: 100%;
       overflow: hidden;
       background: #f8f9fa;
-      padding: 5px;
-      margin-top: 5px;
-    }
-    .marquee-text {
-      font-size: 24px;
-      color: blue;
-      font-weight: bold;
+      padding: 10px;
+      margin-top: 10px;
     }
     .marquee-content {
       display: flex;
-      animation: marquee 10s linear infinite;
-      gap: 15px;
+      animation: marquee 30s linear infinite;
+      gap: 20px;
       direction: ltr;
     }
     .marquee-product {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 5px 15px;
+      padding: 10px 20px;
       background: white;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       direction: rtl;
-      min-width: 300px;
-      width: 300px;      
-      flex-shrink: 0;    
+      min-width: 500px;
+      width: 500px;
+      flex-shrink: 0;
     }
     .marquee-product img {
-      width: 60px;       
+      width: 60px;
       height: 60px;
       object-fit: cover;
       border-radius: 5px;
@@ -128,10 +123,10 @@
       color: #2196F3;
       font-weight: bold;
     }
-   @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+    @keyframes marquee {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
     .sidebar-section {
       margin-bottom: 30px;
     }
@@ -203,6 +198,8 @@
       transition: all 0.3s ease;
       margin-bottom: 20px;
       min-height: 200px;
+      max-height: 350px;
+      overflow: hidden;
     }
     
     .product-content {
@@ -786,6 +783,11 @@
     .product-button:hover {
       background: #0056b3;
     }
+    .marquee-text {
+      font-size: 24px;
+      color: #007bff;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -845,7 +847,7 @@
 
             <h2 class="page-title">قائمة المنتجات</h2>
             <input type="text" id="search" placeholder="ابحث بالوصف أو الباركود">
-            <button class="product-button" onclick="window.location.href='product-presentation.html'">عرض المنتجات</button>
+            <button class="product-button" onclick="window.location.href='product-presentation.html'">معرض المنتجات</button>
 
             <!-- Product list below the search box -->
             <div id="product-list" class="container" style="margin-top: 20px;">
@@ -1119,7 +1121,7 @@
   cartTotal.textContent = `${total.toFixed(2)} درهم`;
 }
 
-    function updateMarquee() {
+function updateMarquee() {
       const marqueeContent = document.querySelector('.marquee-content');
       if (!marqueeContent) return;
       
@@ -1150,6 +1152,8 @@
         marquee.style.animation = 'marquee 30s linear infinite';
       }
     }
+
+
     function increaseQuantity(productId) {
   const item = cart.find(i => i.id === productId);
   if (item) {
