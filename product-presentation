@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض المنتجات</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 80vh;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+
+        .product-description h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: #0056b3;
+        }
+
+        .control-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .control-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <button class="back-button" onclick="window.history.back()">رجوع</button>
+        <img id="productImage" class="product-image" src="" alt="">
+        <div class="product-description">
+            <h2 id="productName"></h2>
+            <p id="productPrice"></p>
+            <p id="productDescription"></p>
+        </div>
+        <div class="control-buttons">
+            <button class="control-button" onclick="prevProduct()">السابق</button>
+            <button class="control-button" onclick="nextProduct()">التالي</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6qlt1NBcaqzCKVkhMBLz76NlpRC36UPs",
+            authDomain: "yttutorialfb-bb7c9.firebaseapp.com",
+            databaseURL: "https://yttutorialfb-bb7c9-default-rtdb.firebaseio.com",
+            projectId: "yttutorialfb-bb7c9",
+            storageBucket: "yttutorialfb-bb7c9.appspot.com",
+            messagingSenderId: "1012190612930",
+            appId: "1:1012190612930:web:5991393b3b17b080e51666"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let products = [];
+        let currentIndex = 0;
+        let slideshowInterval;
+
+        // Get products from Firebase
+        db.ref("Producto").orderByChild("id").limitToLast(100).on("value", (snapshot) => {
+            products = [];
+            snapshot.forEach(child => {
+                const producto = child.val();
+                if (producto.cantidad > 0) {
+                    producto.id = child.key;
+                    products.push(producto);
+                }
+            });
+
+            if (products.length > 0) {
+                displayProduct(currentIndex);
+                startSlideshow();
+            }
+        });
+
+        function displayProduct(index) {
+            const product = products[index];
+            if (product) {
+                document.getElementById("productImage").src = product.url || "";
+                document.getElementById("productName").textContent = product.descrepcion || "";
+                document.getElementById("productPrice").textContent = `${product.pventa || 0} درهم`;
+                document.getElementById("productDescription").textContent = product.descripcion || "";
+            }
+        }
+
+        function startSlideshow() {
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(() => {
+                nextProduct();
+            }, 5000); // 5 seconds
+        }
+
+        function nextProduct() {
+            currentIndex = (currentIndex + 1) % products.length;
+            displayProduct(currentIndex);
+        }
+
+        function prevProduct() {
+            currentIndex = (currentIndex - 1 + products.length) % products.length;
+            displayProduct(currentIndex);
+        }
+
+        // Clean up on page unload
+        window.addEventListener("unload", () => {
+            clearInterval(slideshowInterval);
+        });
+    </script>
+</body>
+</html>
