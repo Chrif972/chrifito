@@ -338,9 +338,47 @@ window.addEventListener('load', () => {
 const speech = new SpeechSynthesisUtterance();
 
 function speak(message) {
+    // التحقق من دعم ميزة النطق
     if ('speechSynthesis' in window) {
-        speech.lang = 'ar-SA';
-        speech.text = message;
-        window.speechSynthesis.speak(speech);
+        // إنشاء كائن جديد للنطق في كل مرة
+        const utterance = new SpeechSynthesisUtterance();
+        
+        // تعيين خصائص النطق
+        utterance.lang = 'ar-SA';
+        utterance.text = message;
+        utterance.rate = 1.0; // سرعة النطق (1.0 هي السرعة الافتراضية)
+        utterance.pitch = 1.0; // ارتفاع الصوت (1.0 هو المتوسط)
+        utterance.volume = 1.0; // مستوى الصوت (1.0 هو الأقصى)
+        
+        // إيقاف أي نطق قائم
+        window.speechSynthesis.cancel();
+        
+        // التحقق من وجود أصوات متاحة
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            // اختيار أول صوت متاح
+            utterance.voice = voices[0];
+            
+            // التحقق من وجود صوت عربي
+            const arabicVoice = voices.find(voice => voice.lang === 'ar-SA');
+            if (arabicVoice) {
+                utterance.voice = arabicVoice;
+            }
+        }
+        
+        // تشغيل النطق
+        window.speechSynthesis.speak(utterance);
+        
+        // إضافة معالج للانتهاء
+        utterance.onend = () => {
+            console.log('تم الانتهاء من النطق');
+        };
+        
+        // إضافة معالج للخطأ
+        utterance.onerror = (event) => {
+            console.error('حدث خطأ في النطق:', event);
+        };
+    } else {
+        console.log('متصفحك لا يدعم ميزة النطق');
     }
 }
