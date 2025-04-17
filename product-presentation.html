@@ -6,7 +6,6 @@
     <title>عرض المنتجات</title>
     <style>
         body {
-            
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -42,14 +41,41 @@
             justify-content: center;
             background-color: #ffffff;
             position: relative;
+            overflow: hidden;
         }
 
-        .product-image {
+        .image-container {
             width: 100%;
             height: 80vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            margin-bottom: 20px;
-            transition: opacity 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .image-container img.main {
+            z-index: 2;
+        }
+
+        .image-container img.next {
+            z-index: 1;
+            transform: translateX(100%);
+            opacity: 0.7;
+        }
+
+        .image-container img.prev {
+            z-index: 1;
+            transform: translateX(-100%);
+            opacity: 0.7;
         }
 
         .product-description {
@@ -62,6 +88,8 @@
             max-width: 800px;
             font-size: 18px;
             color: #333;
+            margin: 20px 0;
+            transition: all 0.3s ease;
         }
 
         .controls {
@@ -72,6 +100,10 @@
             display: flex;
             gap: 10px;
             z-index: 10;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .control-btn {
@@ -81,11 +113,12 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
         .control-btn:hover {
             background: #0056b3;
+            transform: translateY(-2px);
         }
 
         .stop-btn {
@@ -100,7 +133,11 @@
 <body>
     <div class="presentation-container">
         <button class="back-btn" onclick="window.location.href='index.html'">رجوع</button>
-        <img id="productImage" class="product-image" src="" alt="">
+        <div class="image-container">
+            <img id="productImage" class="main" src="" alt="">
+            <img id="nextImage" class="next" src="" alt="">
+            <img id="prevImage" class="prev" src="" alt="">
+        </div>
         <div class="product-description" id="productDescription"></div>
         <div class="controls">
             <button class="control-btn" onclick="startPresentation()">بدء العرض</button>
@@ -120,14 +157,15 @@
             messagingSenderId: "1062760617376",
             appId: "1:1062760617376:web:79276b2c60292186e85851"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let products = [];
         let currentIndex = 0;
-        let intervalId = null;
+        let interval;
+        let isPlaying = false;
 
-        // Get products from Firebase
         db.ref("Producto").orderByChild("id").limitToLast(100).on("value", (snapshot) => {
             products = [];
             snapshot.forEach(child => {
@@ -138,36 +176,48 @@
             });
             if (products.length > 0) {
                 displayProduct(currentIndex);
+                updateNextPrevImages();
             }
         });
 
-        function displayProduct(index) {
-            if (products.length === 0) return;
+        function updateNextPrevImages() {
+            const nextIndex = (currentIndex + 1) % products.length;
+            const prevIndex = (currentIndex - 1 + products.length) % products.length;
+            
+            document.getElementById('nextImage').src = products[nextIndex].url;
+            document.getElementById('prevImage').src = products[prevIndex].url;
+        }
 
+        function displayProduct(index) {
+            if (index < 0 || index >= products.length) return;
+            
             const product = products[index];
-            document.getElementById("productImage").src = product.url;
-            document.getElementById("productDescription").innerHTML = `
+            document.getElementById('productImage').src = product.url;
+            document.getElementById('productDescription').innerHTML = `
                 <h2>${product.descrepcion}</h2>
                 <p>السعر: ${product.pventa} درهم</p>
                 ${product.marca ? `<p>العلامة التجارية: ${product.marca}</p>` : ''}
                 ${product.cantidad <= 5 ? `<p class="alert">الكمية المتبقية: ${product.cantidad}</p>` : ''}
             `;
+            
+            updateNextPrevImages();
         }
 
         function startPresentation() {
-            if (intervalId) return;
+            if (isPlaying) return;
             
-            intervalId = setInterval(() => {
+            isPlaying = true;
+            interval = setInterval(() => {
                 currentIndex = (currentIndex + 1) % products.length;
                 displayProduct(currentIndex);
-            }, 5000);
+            }, 3000);
         }
 
         function stopPresentation() {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
+            if (!isPlaying) return;
+            
+            isPlaying = false;
+            clearInterval(interval);
         }
 
         // Start presentation automatically
